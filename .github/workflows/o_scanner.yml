@@ -1,0 +1,47 @@
+name: OKX V5 Timing Radar
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  scan_and_email:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests pandas numpy
+
+    - name: Run OKX Scanner
+      run: |
+        python okx_scan.py
+
+    - name: Read Email Subject
+      id: read_report
+      run: |
+        echo "SUBJECT=$(cat subject.txt)" >> $GITHUB_ENV
+
+    - name: Send Standard HTML Email
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.qq.com
+        server_port: 465
+        username: ${{ secrets.MAIL_USER }}
+        password: ${{ secrets.MAIL_PASS }}
+        
+        subject: ${{ env.SUBJECT }}
+        html_body: file://report.html
+        
+        to: ${{ secrets.MAIL_USER }}
+        from: OKX V5 Quant Radar
