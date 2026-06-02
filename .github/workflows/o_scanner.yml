@@ -25,7 +25,7 @@ jobs:
 
     - name: Run OKX Scanner
       run: |
-        python okx_scan.py
+        python o.py
 
     - name: Read Email Subject
       id: read_report
